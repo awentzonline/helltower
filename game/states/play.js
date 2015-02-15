@@ -1,6 +1,7 @@
 'use strict';
 
 var Climber = require('../elements/climber');
+var FallingDebris = require('../elements/falling-debris');
 
 function Play() {}
 
@@ -19,10 +20,15 @@ Play.prototype = {
     this.player.animations.add('climbLeft', [0,11,10,11]); 
     this.game.add.existing(this.player);
     this.game.camera.follow(this.player);
+
+    this.debrisGroup = this.game.add.group();
+    this.debrisDelay = 1000;
+    this.debrisCountdown = this.debrisDelay;
   },
   update: function() {
     this.wall.tilePosition.y = -this.game.camera.view.top;
     this.updateKeyControls();
+    this.updateDebris();
   },
   updateKeyControls: function () {
     var controls = this.player.controls;
@@ -33,8 +39,19 @@ Play.prototype = {
     controls.moveUp = keyboard.isDown(Phaser.Keyboard.W);
     controls.moveDown = keyboard.isDown(Phaser.Keyboard.S);
   },
-  clickListener: function() {
-    this.game.state.start('gameover');
+  updateDebris: function () {
+    var dt = this.game.time.elapsed;
+    this.debrisCountdown -= dt;
+    if (this.debrisCountdown <= 0) {
+      var x = Math.random() * this.game.camera.view.width;
+      var y = this.game.camera.view.top;
+      var debris = new FallingDebris(this.game, x, y, 'chair0');
+      this.debrisGroup.add(debris);
+      this.debrisCountdown = this.debrisDelay;
+    }
+    this.game.physics.arcade.overlap(this.player, this.debrisGroup, function (player, debris) {
+      this.game.state.start('gameover');
+    }.bind(this));
   }
 };
 
