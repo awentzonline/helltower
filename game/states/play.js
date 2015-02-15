@@ -45,7 +45,9 @@ Play.prototype = {
     if (this.debrisCountdown <= 0) {
       var x = Math.random() * this.game.camera.view.width;
       var y = this.game.camera.view.top;
-      var debris = new FallingDebris(this.game, x, y, 'chair0');
+      var types = ['chair0', 'banker_falling'];
+      var frame = types[Math.floor(Math.random() * types.length)];
+      var debris = new FallingDebris(this.game, x, y, frame);
       this.debrisGroup.add(debris);
       this.debrisCountdown = this.debrisDelay;
     }

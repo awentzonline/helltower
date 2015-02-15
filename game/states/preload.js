@@ -15,6 +15,7 @@ Preload.prototype = {
     this.load.spritesheet('climber', 'assets/banker_climb.png', 61, 150, 12);
     this.load.image('wall0', 'assets/wall0.png');
     this.load.image('chair0', 'assets/chair0.png');
+    this.load.image('banker_falling', 'assets/banker_falling.png');
   },
   create: function() {
     this.asset.cropEnabled = false;
