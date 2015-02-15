@@ -224,7 +224,9 @@ Play.prototype = {
     if (this.debrisCountdown <= 0) {
       var x = Math.random() * this.game.camera.view.width;
       var y = this.game.camera.view.top;
-      var debris = new FallingDebris(this.game, x, y, 'chair0');
+      var types = ['chair0', 'banker_falling'];
+      var frame = types[Math.floor(Math.random() * types.length)];
+      var debris = new FallingDebris(this.game, x, y, frame);
       this.debrisGroup.add(debris);
       this.debrisCountdown = this.debrisDelay;
     }
@@ -254,6 +256,7 @@ Preload.prototype = {
     this.load.spritesheet('climber', 'assets/banker_climb.png', 61, 150, 12);
     this.load.image('wall0', 'assets/wall0.png');
     this.load.image('chair0', 'assets/chair0.png');
+    this.load.image('banker_falling', 'assets/banker_falling.png');
   },
   create: function() {
     this.asset.cropEnabled = false;
