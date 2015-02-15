@@ -201,8 +201,9 @@ Play.prototype = {
     this.game.camera.follow(this.player);
 
     this.debrisGroup = this.game.add.group();
-    this.debrisDelay = 1000;
-    this.debrisCountdown = this.debrisDelay;
+    this.debrisMinDelay = 500;
+    this.debrisMaxDelay = 1000;
+    this.debrisCountdown = this.debrisMaxDelay;
   },
   update: function() {
     this.wall.tilePosition.y = -this.game.camera.view.top;
@@ -228,7 +229,7 @@ Play.prototype = {
       var frame = types[Math.floor(Math.random() * types.length)];
       var debris = new FallingDebris(this.game, x, y, frame);
       this.debrisGroup.add(debris);
-      this.debrisCountdown = this.debrisDelay;
+      this.debrisCountdown = this.debrisMinDelay + Math.random() * (this.debrisMaxDelay - this.debrisMinDelay);
     }
     this.game.physics.arcade.overlap(this.player, this.debrisGroup, function (player, debris) {
       this.game.state.start('gameover');
