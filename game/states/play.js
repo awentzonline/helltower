@@ -13,7 +13,7 @@ Play.prototype = {
     this.wall.fixedToCamera = true;
     this.game.world.setBounds(0, 0, 800, gameHeight);
     
-    this.player = new Climber(this.game, 200, gameHeight * 0.5, 'climber');   
+    this.player = new Climber(this.game, 200, 300, 'climber');   
     this.player.animations.add('climbUp', [0,1,2,3,4,5,6,7,8,9,10,11]); 
     this.player.animations.add('climbDown', [11,10,9,8,7,6,5,4,3,2,1,0]); 
     this.player.animations.add('climbRight', [0,1,2,1]); 
