@@ -70,6 +70,24 @@ module.exports = Climber;
 },{"./actor":1}],3:[function(require,module,exports){
 'use strict';
 
+function FallingDebris(game, x, y, key, frame) {
+  Phaser.Sprite.call(this, game, x, y, key, frame);
+  this.anchor.setTo(0.5, 0.5);
+  this.rotation = Math.random() * 2 * Math.PI;
+  game.physics.enable(this, Phaser.Physics.ARCADE);
+  this.body.velocity.y = (1 + Math.random()) * 200;
+  this.body.angularVelocity = 360 * 0.5; // degrees per second?
+  this.body.acceleration.y = 800;
+}
+
+FallingDebris.prototype = Object.create(Phaser.Sprite.prototype);
+FallingDebris.prototype.constructor = FallingDebris;
+
+module.exports = FallingDebris;
+
+},{}],4:[function(require,module,exports){
+'use strict';
+
 //global variables
 window.onload = function () {
   var game = new Phaser.Game(800, 600, Phaser.AUTO, 'helltower');
@@ -84,7 +102,7 @@ window.onload = function () {
 
   game.state.start('boot');
 };
-},{"./states/boot":4,"./states/gameover":5,"./states/menu":6,"./states/play":7,"./states/preload":8}],4:[function(require,module,exports){
+},{"./states/boot":5,"./states/gameover":6,"./states/menu":7,"./states/play":8,"./states/preload":9}],5:[function(require,module,exports){
 
 'use strict';
 
@@ -103,7 +121,7 @@ Boot.prototype = {
 
 module.exports = Boot;
 
-},{}],5:[function(require,module,exports){
+},{}],6:[function(require,module,exports){
 
 'use strict';
 function GameOver() {}
@@ -117,7 +135,7 @@ GameOver.prototype = {
     this.titleText = this.game.add.text(this.game.world.centerX,100, 'Game Over!', style);
     this.titleText.anchor.setTo(0.5, 0.5);
 
-    this.congratsText = this.game.add.text(this.game.world.centerX, 200, 'You Win!', { font: '32px Arial', fill: '#ffffff', align: 'center'});
+    this.congratsText = this.game.add.text(this.game.world.centerX, 200, 'You did not survive Hell Tower', { font: '32px Arial', fill: '#ffffff', align: 'center'});
     this.congratsText.anchor.setTo(0.5, 0.5);
 
     this.instructionText = this.game.add.text(this.game.world.centerX, 300, 'Click To Play Again', { font: '16px Arial', fill: '#ffffff', align: 'center'});
@@ -131,7 +149,7 @@ GameOver.prototype = {
 };
 module.exports = GameOver;
 
-},{}],6:[function(require,module,exports){
+},{}],7:[function(require,module,exports){
 
 'use strict';
 function Menu() {}
@@ -158,10 +176,11 @@ Menu.prototype = {
 
 module.exports = Menu;
 
-},{}],7:[function(require,module,exports){
+},{}],8:[function(require,module,exports){
 'use strict';
 
 var Climber = require('../elements/climber');
+var FallingDebris = require('../elements/falling-debris');
 
 function Play() {}
 
@@ -180,10 +199,15 @@ Play.prototype = {
     this.player.animations.add('climbLeft', [0,11,10,11]); 
     this.game.add.existing(this.player);
     this.game.camera.follow(this.player);
+
+    this.debrisGroup = this.game.add.group();
+    this.debrisDelay = 1000;
+    this.debrisCountdown = this.debrisDelay;
   },
   update: function() {
     this.wall.tilePosition.y = -this.game.camera.view.top;
     this.updateKeyControls();
+    this.updateDebris();
   },
   updateKeyControls: function () {
     var controls = this.player.controls;
@@ -194,14 +218,25 @@ Play.prototype = {
     controls.moveUp = keyboard.isDown(Phaser.Keyboard.W);
     controls.moveDown = keyboard.isDown(Phaser.Keyboard.S);
   },
-  clickListener: function() {
-    this.game.state.start('gameover');
+  updateDebris: function () {
+    var dt = this.game.time.elapsed;
+    this.debrisCountdown -= dt;
+    if (this.debrisCountdown <= 0) {
+      var x = Math.random() * this.game.camera.view.width;
+      var y = this.game.camera.view.top;
+      var debris = new FallingDebris(this.game, x, y, 'chair0');
+      this.debrisGroup.add(debris);
+      this.debrisCountdown = this.debrisDelay;
+    }
+    this.game.physics.arcade.overlap(this.player, this.debrisGroup, function (player, debris) {
+      this.game.state.start('gameover');
+    }.bind(this));
   }
 };
 
 module.exports = Play;
 
-},{"../elements/climber":2}],8:[function(require,module,exports){
+},{"../elements/climber":2,"../elements/falling-debris":3}],9:[function(require,module,exports){
 
 'use strict';
 function Preload() {
@@ -218,6 +253,7 @@ Preload.prototype = {
     this.load.setPreloadSprite(this.asset);
     this.load.spritesheet('climber', 'assets/banker_climb.png', 61, 150, 12);
     this.load.image('wall0', 'assets/wall0.png');
+    this.load.image('chair0', 'assets/chair0.png');
   },
   create: function() {
     this.asset.cropEnabled = false;
@@ -234,4 +270,4 @@ Preload.prototype = {
 
 module.exports = Preload;
 
-},{}]},{},[3])
+},{}]},{},[4])
