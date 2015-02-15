@@ -76,7 +76,7 @@ function FallingDebris(game, x, y, key, frame) {
   this.rotation = Math.random() * 2 * Math.PI;
   game.physics.enable(this, Phaser.Physics.ARCADE);
   this.body.velocity.y = (1 + Math.random()) * 200;
-  this.body.angularVelocity = 360 * 0.5; // degrees per second?
+  this.body.angularVelocity = (2 * Math.random() - 1.0) * 360; // degrees per second?
   this.body.acceleration.y = 800;
 }
 
