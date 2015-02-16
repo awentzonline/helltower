@@ -7,6 +7,12 @@ function Play() {}
 
 Play.prototype = {
   create: function() {
+    this.game.input.keyboard.addKeyCapture([
+      Phaser.Keyboard.LEFT,
+      Phaser.Keyboard.RIGHT,
+      Phaser.Keyboard.UP,
+      Phaser.Keyboard.DOWN
+    ]);
     this.game.physics.startSystem(Phaser.Physics.ARCADE);
     var gameHeight = 10000;
     this.wall = this.game.add.tileSprite(0, 0, this.game.width, this.game.height, 'wall0');
@@ -28,17 +34,33 @@ Play.prototype = {
   },
   update: function() {
     this.wall.tilePosition.y = -this.game.camera.view.top;
-    this.updateKeyControls();
+    // if (this.game.device.desktop && false) {
+    //   this.updateKeyControls();
+    // } else {
+      this.updateTouchControls();
+    // }
     this.updateDebris();
   },
   updateKeyControls: function () {
     var controls = this.player.controls;
     var keyboard = this.game.input.keyboard;
     controls.moveLeft = controls.moveRight = false;
-    controls.moveLeft = keyboard.isDown(Phaser.Keyboard.A);
-    controls.moveRight = keyboard.isDown(Phaser.Keyboard.D);
-    controls.moveUp = keyboard.isDown(Phaser.Keyboard.W);
-    controls.moveDown = keyboard.isDown(Phaser.Keyboard.S);
+    controls.moveLeft = keyboard.isDown(Phaser.Keyboard.LEFT);
+    controls.moveRight = keyboard.isDown(Phaser.Keyboard.RIGHT);
+    controls.moveUp = keyboard.isDown(Phaser.Keyboard.UP);
+    controls.moveDown = keyboard.isDown(Phaser.Keyboard.DOWN);
+  },
+  updateTouchControls: function () {
+    var controls = this.player.controls;
+    var pointer = this.game.input.activePointer;
+    if (pointer) {
+      var epsilon = this.player.width * 0.25;
+      controls.moveLeft = controls.moveRight = false;
+      controls.moveLeft = pointer.worldX < this.player.x - epsilon;
+      controls.moveRight = pointer.worldX > this.player.x + epsilon;
+      controls.moveUp = pointer.worldY < this.player.y - epsilon;
+      controls.moveDown = pointer.worldY > this.player.y + epsilon;
+    }
   },
   updateDebris: function () {
     var dt = this.game.time.elapsed;

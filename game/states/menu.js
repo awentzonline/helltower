@@ -14,7 +14,9 @@ Menu.prototype = {
 
     // this.instructionsText = this.game.add.text(this.game.world.centerX, 400, 'Click anywhere to play', { font: '16px Arial', fill: '#ffffff', align: 'center'});
     // this.instructionsText.anchor.setTo(0.5, 0.5);
-
+    this.game.input.keyboard.onDownCallback = function () {
+      this.game.state.start('play');
+    };
   },
   update: function() {
     if(this.game.input.activePointer.justPressed()) {
