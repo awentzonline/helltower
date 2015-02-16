@@ -288,7 +288,12 @@ Play.prototype = {
       var debris = this.debrisGroup.getFirstDead();
       if (!debris) {
         var types = ['chair0', 'banker_falling'];
-        var frame = types[Math.floor(Math.random() * types.length)];
+        var frame;
+        if (this.debrisGroup.total < 2) {  // make sure we get some variety
+          frame = types[this.debrisGroup.total];
+        } else {
+          frame = types[Math.floor(Math.random() * types.length)];
+        }
         var debris = new FallingDebris(this.game, x, y, frame);
         this.debrisGroup.add(debris);
       }
