@@ -73,15 +73,39 @@ module.exports = Climber;
 function FallingDebris(game, x, y, key, frame) {
   Phaser.Sprite.call(this, game, x, y, key, frame);
   this.anchor.setTo(0.5, 0.5);
-  this.rotation = Math.random() * 2 * Math.PI;
   game.physics.enable(this, Phaser.Physics.ARCADE);
+  var emitter = this.game.add.emitter(x, y, 100);
+  emitter.makeParticles('smoke');
+  emitter.setXSpeed(-50, 50);
+  emitter.setYSpeed(0, -200);
+  emitter.setRotation(0, 0);
+  emitter.setAlpha(0.1, 1, 3000);
+  emitter.setScale(0.4, 2, 0.4, 2, 6000, Phaser.Easing.Quintic.Out);
+  emitter.gravity = -300;
+  emitter.start(false, 250, 1);
+  emitter.emitX = 0;
+  emitter.emitY = 0;
+  this.smokeEmitter = emitter;
+}
+
+FallingDebris.prototype = Object.create(Phaser.Sprite.prototype);
+FallingDebris.prototype.constructor = FallingDebris;
+
+FallingDebris.prototype.reset = function (x, y) {
+  Phaser.Sprite.prototype.reset.call(this, x, y);
+  this.rotation = Math.random() * 2 * Math.PI;
   this.body.velocity.y = (1 + Math.random()) * 200;
   this.body.angularVelocity = (2 * Math.random() - 1.0) * 360; // degrees per second?
   this.body.acceleration.y = 800;
 }
 
-FallingDebris.prototype = Object.create(Phaser.Sprite.prototype);
-FallingDebris.prototype.constructor = FallingDebris;
+  
+FallingDebris.prototype.update = function () {
+  Phaser.Sprite.prototype.update.call(this);
+  this.smokeEmitter.on = this.alive;
+  this.smokeEmitter.x = this.x;
+  this.smokeEmitter.y = this.y;
+}
 
 module.exports = FallingDebris;
 
@@ -222,14 +246,25 @@ Play.prototype = {
   },
   updateDebris: function () {
     var dt = this.game.time.elapsed;
+    this.debrisGroup.forEachAlive(function (debris) {
+      // far below the camera?
+      var camera = this.game.camera;
+      if (debris.y > camera.view.bottom + camera.view.height) {
+        debris.kill();
+      }
+    }, this);
     this.debrisCountdown -= dt;
     if (this.debrisCountdown <= 0) {
       var x = Math.random() * this.game.camera.view.width;
       var y = this.game.camera.view.top;
-      var types = ['chair0', 'banker_falling'];
-      var frame = types[Math.floor(Math.random() * types.length)];
-      var debris = new FallingDebris(this.game, x, y, frame);
-      this.debrisGroup.add(debris);
+      var debris = this.debrisGroup.getFirstDead();
+      if (!debris) {
+        var types = ['chair0', 'banker_falling'];
+        var frame = types[Math.floor(Math.random() * types.length)];
+        var debris = new FallingDebris(this.game, x, y, frame);
+        this.debrisGroup.add(debris);
+      }
+      debris.reset(x, y);
       this.debrisCountdown = this.debrisMinDelay + Math.random() * (this.debrisMaxDelay - this.debrisMinDelay);
     }
     this.game.physics.arcade.overlap(this.player, this.debrisGroup, function (player, debris) {
@@ -260,6 +295,7 @@ Preload.prototype = {
     this.load.image('chair0', 'assets/chair0.png');
     this.load.image('banker_falling', 'assets/banker_falling.png');
     this.load.image('title', 'assets/intro.jpg');
+    this.load.image('smoke', 'assets/smoke-puff.png');
   },
   create: function() {
     this.asset.cropEnabled = false;
