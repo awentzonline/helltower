@@ -42,14 +42,25 @@ Play.prototype = {
   },
   updateDebris: function () {
     var dt = this.game.time.elapsed;
+    this.debrisGroup.forEachAlive(function (debris) {
+      // far below the camera?
+      var camera = this.game.camera;
+      if (debris.y > camera.view.bottom + camera.view.height) {
+        debris.kill();
+      }
+    }, this);
     this.debrisCountdown -= dt;
     if (this.debrisCountdown <= 0) {
       var x = Math.random() * this.game.camera.view.width;
       var y = this.game.camera.view.top;
-      var types = ['chair0', 'banker_falling'];
-      var frame = types[Math.floor(Math.random() * types.length)];
-      var debris = new FallingDebris(this.game, x, y, frame);
-      this.debrisGroup.add(debris);
+      var debris = this.debrisGroup.getFirstDead();
+      if (!debris) {
+        var types = ['chair0', 'banker_falling'];
+        var frame = types[Math.floor(Math.random() * types.length)];
+        var debris = new FallingDebris(this.game, x, y, frame);
+        this.debrisGroup.add(debris);
+      }
+      debris.reset(x, y);
       this.debrisCountdown = this.debrisMinDelay + Math.random() * (this.debrisMaxDelay - this.debrisMinDelay);
     }
     this.game.physics.arcade.overlap(this.player, this.debrisGroup, function (player, debris) {

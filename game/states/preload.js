@@ -17,6 +17,7 @@ Preload.prototype = {
     this.load.image('chair0', 'assets/chair0.png');
     this.load.image('banker_falling', 'assets/banker_falling.png');
     this.load.image('title', 'assets/intro.jpg');
+    this.load.image('smoke', 'assets/smoke-puff.png');
   },
   create: function() {
     this.asset.cropEnabled = false;
